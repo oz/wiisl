@@ -1,4 +1,3 @@
 #!/bin/sh
 
-echo 'volume down'
-amixer sset Master '10%-'
+echo 'Minus button pressed'

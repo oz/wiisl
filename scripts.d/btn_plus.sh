@@ -1,4 +1,3 @@
 #!/bin/sh
 
-echo 'volume up'
-amixer sset Master '10%+'
+echo 'Plus button pressed'
