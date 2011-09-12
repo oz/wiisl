@@ -80,7 +80,7 @@ class Wiisl:
         except IOError as e:
             return 0
         subprocess.call(filename)
-        self.vibrate(0.3)
+        self.vibrate(0.1)
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
@@ -93,6 +93,7 @@ if __name__ == "__main__":
         try:
             print('Waiting for wiimote ' + wiimote_mac)
             wm = Wiisl(wiimote_mac)
+            wm.vibrate(0.1)
             print("Ready!")
             wm.run()
         except RuntimeError:
