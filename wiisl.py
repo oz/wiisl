@@ -11,7 +11,7 @@ from time import sleep
 import cwiid
 from cwiid import Wiimote
 
-class Wiird:
+class Wiisl:
     def __init__(self, mac_address):
         self.omg_please_stop  = False
         self.wm               = cwiid.Wiimote(mac_address)
@@ -92,7 +92,7 @@ if __name__ == "__main__":
     while True:
         try:
             print('Waiting for wiimote ' + wiimote_mac)
-            wm = Wiird(wiimote_mac)
+            wm = Wiisl(wiimote_mac)
             print("Ready!")
             wm.run()
         except RuntimeError:

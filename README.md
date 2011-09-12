@@ -1,13 +1,14 @@
 About
 =====
 
-Wiird is a weird and evil python script I wrote -- hey it's my first!
+Wiisl is a weird and evil python script I wrote -- hey it's my first!
 
-Wiird, weird... get it? Very bad pun, meh.
+Wiisl, weasel or whistle... get it? Very bad pun, meh. Call it Wii
+Script Launcher if you prefer.
 
 It's currently running on an old Eee-pc at AF83's offices. The recycled
 hardware is running shell-fm in the evenings, and is hooked up to a
-decent sound system.  Therefore, wiird is my sunday afternoon hack to
+decent sound system.  Therefore, wiisl is my sunday afternoon hack to
 have a remote for it.
 
 The code is rough, sorry about that, but at least it works for me.
@@ -16,9 +17,9 @@ Criticism is encouraged, pull-requests warmly welcomed. Anyway, HTH.
 Installing
 ==========
 
-Clone the Git depot at https://github.com/oz/wiird
+Clone the Git depot at https://github.com/oz/wiisl
 
-You need the following to run the `wiird.py` script:
+You need the following to run the `wiisl.py` script:
 
  * Python, well duh. I only checked the code against python 2.6.7.
  * The `cwiid` lib, and more importantly its python bindings. I used
@@ -30,15 +31,15 @@ YMMV.
 Running
 =======
 
-Run `./wiird.py <WIIMOTE MAC ADDRESS>`
+Run `./wiisl.py <WIIMOTE MAC ADDRESS>`
 
-Hit the 1 and 2 buttons of your wiimote for wiird to connect to it. The
+Hit the 1 and 2 buttons of your wiimote for wiisl to connect to it. The
 LEDs 2 and 3 are lit up when the device is ready.
 
 Configuring
 ===========
 
-wiird comes with a set of preconfigured scripts that are run crudely
+wiisl comes with a set of preconfigured scripts that are run crudely
 when the appropriate event is detected on the Wiimote.
 
 Those sit in the `scripts.d/` directory, and follow a naming losely
