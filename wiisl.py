@@ -20,6 +20,12 @@ class Wiisl:
 
         # Light up LEDs 2 and 3 when we're connected
         self.wm.led           = 2 | 4
+        self.last_activity    = time.time()
+        self._timeout         = 60
+
+    # Set inactivity timeout in seconds
+    def timeout(self, seconds):
+        self._timeout = seconds
 
     # When the wiimote is powered down, this mesg callback is called,
     # and a is [(8, 1)]. I REALLY have no idea why, and not time to dig
@@ -40,6 +46,7 @@ class Wiisl:
     #
     # Whenever both are true, the handler script is launched.
     def run_handler(self, handler):
+        self.last_activity = time.time()
         const_name = handler.upper()
         try:
             const_value = getattr(cwiid, const_name)
@@ -60,7 +67,18 @@ class Wiisl:
             if self.omg_please_stop:
                 self.omg_please_stop = False
                 break
+            # On timeout, close wiimote connection
+            if self.inactive():
+                print("Inactive, closing connection")
+                self.wm.close()
+                sleep(5)
+                break
             sleep(0.1)
+
+    # Return True if no event was received for more that self._timeout
+    # seconds.
+    def inactive(self):
+        return time.time() - self.last_activity > self._timeout
 
     # Vibrate for a while.
     def vibrate(self, duration):
@@ -93,6 +111,7 @@ if __name__ == "__main__":
         try:
             print('Waiting for wiimote ' + wiimote_mac)
             wm = Wiisl(wiimote_mac)
+            wm.timeout(90)
             wm.vibrate(0.1)
             print("Ready!")
             wm.run()
