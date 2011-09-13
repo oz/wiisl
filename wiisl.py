@@ -4,9 +4,11 @@ import sys
 import time
 import subprocess
 import os.path
+import getopt
 import re
 from glob import glob
 from time import sleep
+from getopt import getopt
 
 import cwiid
 from cwiid import Wiimote
@@ -22,30 +24,38 @@ class Wiisl:
         self.wm.led           = 2 | 4
         self.last_activity    = time.time()
         self._timeout         = 60
+        self.script_dir       = "./scripts.d"
 
-    # Set inactivity timeout in seconds
-    def timeout(self, seconds):
+    def set_timeout(self, seconds):
+        """Set inactivity timeout in seconds"""
         self._timeout = seconds
 
-    # When the wiimote is powered down, this mesg callback is called,
-    # and a is [(8, 1)]. I REALLY have no idea why, and not time to dig
-    # in cwiid's source code ATM.  Documentation would help. :)
+    def set_script_dir(self, path):
+        """Set script dir path."""
+        self.script_dir = path
+
     def mesg_cb(self, a, b):
+        """When the wiimote is powered down, this mesg callback is
+        called, and a is [(8, 1)]. I REALLY have no idea why, and not
+        time to dig in cwiid's source code ATM.  Documentation would
+        help. :)"""
         if a[0] == (8, 1):
             self.omg_please_stop = True
 
-    # List scripts in scripts.d/ directory, without their extension.
     def list_scripts(self):
-        return [re.sub(r'.*/(.*)\.sh', r'\1', x) for x in glob("./scripts.d/*.sh")]
+        """List scripts in scripts.d/ directory, without their
+        extension."""
+        glob_exp = self.script_dir + "/*.sh"
+        return [re.sub(r'.*/(.*)\.sh', r'\1', x) for x in glob(glob_exp)]
 
-    # Check self.wm.state['buttons'] value against each sh script in the
-    # scripts.d/ directory.  The script name is passed as 'handler', it
-    # is uppercased to check:
-    #   - wether the constant exists in cwiid
-    #   - wether a button event matches
-    #
-    # Whenever both are true, the handler script is launched.
     def run_handler(self, handler):
+        """Check self.wm.state['buttons'] value against each sh script
+        in the scripts.d/ directory.  The script name is passed as
+        'handler', it is uppercased to check:
+          - wether the constant exists in cwiid
+          - wether a button event matches
+
+        Whenever both are true, the handler script is launched."""
         self.last_activity = time.time()
         const_name = handler.upper()
         try:
@@ -55,12 +65,11 @@ class Wiisl:
         except AttributeError:
             return 0
 
-    # Main-loop, running while a wiimote is connected.
     def run(self):
+        """Main-loop, running while a wiimote is connected."""
         # I want to reload the list of scripts on each
         # disconnect/reconnect: it's easier to debug. :)
         scripts = self.list_scripts()
-
         while True:
             if 0 != self.wm.state['buttons']:
                 [self.run_handler(script) for script in scripts]
@@ -69,30 +78,29 @@ class Wiisl:
                 break
             # On timeout, close wiimote connection
             if self.inactive():
-                print("Inactive, closing connection")
                 self.wm.close()
                 sleep(5)
                 break
             sleep(0.1)
 
-    # Return True if no event was received for more that self._timeout
-    # seconds.
     def inactive(self):
+        """Return True if no event was received for more that
+        self._timeout seconds."""
         return time.time() - self.last_activity > self._timeout
 
-    # Vibrate for a while.
     def vibrate(self, duration):
+        """Vibrate for a while."""
         self.wm.rumble = 1
         sleep(duration)
         self.wm.rumble = 0
 
-    # Run script if it exists in scripts.d/ directory
     def exec_script(self, script):
-        filename = "./scripts.d/" + script + ".sh" 
-        # FIXME
+        """Run script if it exists in scripts.d/ directory"""
+        filename = self.script_dir + "/" + script + ".sh" 
+        # XXX
         # Stackoverflow pretends this is the prefered way to verify that
         # a file exist, I say it's ugly. Plus I should check for exec
-        # rights. :p
+        # rights.
         try:
             open(filename)
         except IOError as e:
@@ -101,17 +109,30 @@ class Wiisl:
         self.vibrate(0.1)
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        sys.stderr.write("Usage: wyyrd.py <wiimote mac address>")
+    script_dir = "./scripts.d"
+    opts, args = getopt(sys.argv[1:], 'hs:')
+
+    def usage():
+        sys.stderr.write("Usage: wyyrd.py [-s <script dir>] <wiimote mac address>\n")
         exit(1)
 
-    wiimote_mac = sys.argv[1]
+    if len(sys.argv) < 2:
+        usage()
+
+    for o, a in opts:
+        if o == '-s':
+            script_dir = a
+        else:
+            usage()
+
+    wiimote_mac = args[0]
     print('Put your Wiimote in discoverable mode now: press 1+2...')
     while True:
         try:
             print('Waiting for wiimote ' + wiimote_mac)
             wm = Wiisl(wiimote_mac)
-            wm.timeout(90)
+            wm.set_timeout(90)
+            wm.set_script_dir(script_dir)
             wm.vibrate(0.1)
             print("Ready!")
             wm.run()
