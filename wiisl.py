@@ -3,7 +3,7 @@
 import sys
 import time
 import subprocess
-import os.path
+import os, sys
 import getopt
 import re
 from glob import glob
@@ -96,17 +96,12 @@ class Wiisl:
 
     def exec_script(self, script):
         """Run script if it exists in scripts.d/ directory"""
-        filename = self.script_dir + "/" + script + ".sh" 
-        # XXX
-        # Stackoverflow pretends this is the prefered way to verify that
-        # a file exist, I say it's ugly. Plus I should check for exec
-        # rights.
-        try:
-            open(filename)
-        except IOError as e:
-            return 0
-        subprocess.call(filename)
-        self.vibrate(0.1)
+        filename = os.path.join(self.script_dir, script + ".sh")
+        # http://docs.python.org/library/os.html#os.X_OK
+        if os.access(filename, os.X_OK):
+            with open(filename):
+                subprocess.call(filename)
+                self.vibrate(0.1)
 
 if __name__ == "__main__":
     script_dir = "./scripts.d"
