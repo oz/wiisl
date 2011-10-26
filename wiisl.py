@@ -105,10 +105,11 @@ class Wiisl:
 
 if __name__ == "__main__":
     script_dir = "./scripts.d"
-    opts, args = getopt(sys.argv[1:], 'hs:')
+    timeout    = 90
+    opts, args = getopt(sys.argv[1:], 'hs:t:')
 
     def usage():
-        sys.stderr.write("Usage: wyyrd.py [-s <script dir>] <wiimote mac address>\n")
+        sys.stderr.write("Usage: wyyrd.py [-s <script dir>] [-t <timeout>] <wiimote mac address>\n")
         exit(1)
 
     if len(sys.argv) < 2:
@@ -117,6 +118,8 @@ if __name__ == "__main__":
     for o, a in opts:
         if o == '-s':
             script_dir = a
+        if o == '-t':
+            timeout = a
         else:
             usage()
 
@@ -126,7 +129,7 @@ if __name__ == "__main__":
         try:
             print('Waiting for wiimote ' + wiimote_mac)
             wm = Wiisl(wiimote_mac)
-            wm.set_timeout(90)
+            if timeout != '0': wm.set_timeout(timeout)
             wm.set_script_dir(script_dir)
             wm.vibrate(0.1)
             print("Ready!")
